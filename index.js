@@ -53,10 +53,17 @@ client.on('interactionCreate', async (interaction) => {
   if (!command) return;
 
   try {
+    // Auto defer cho tất cả slash command nếu chưa trả lời
+    if (!interaction.deferred && !interaction.replied) {
+      await interaction.deferReply();
+    }
+
     await command.slashExecute(interaction);
   } catch (error) {
     console.error(error);
-    interaction.reply('❌ Có lỗi khi chạy slash command!');
+    if (!interaction.replied) {
+      await interaction.editReply('❌ Có lỗi khi chạy slash command!');
+    }
   }
 });
 
