@@ -8,10 +8,6 @@ const commands = [
     .setDescription('Chào slash command'),
 
   new SlashCommandBuilder()
-    .setName('time')
-    .setDescription('Xem giờ hiện tại'),
-
-  new SlashCommandBuilder()
     .setName('kiss')
     .setDescription('Hôn một người')
     .addUserOption(option =>
@@ -35,14 +31,19 @@ const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 (async () => {
   try {
     console.log('🚀 Bắt đầu đăng ký slash commands...');
+
+    // Xóa toàn bộ global commands
     await rest.put(
-     Routes.applicationCommands(process.env.CLIENT_ID),
+      Routes.applicationCommands(process.env.CLIENT_ID),
+      { body: [] },
+    );
+
+    // Đăng ký lại guild commands trong server của bạn
+    await rest.put(
+      Routes.applicationGuildCommands(process.env.CLIENT_ID, '1249175249820581960'),
       { body: commands },
     );
-    await rest.put(
-  Routes.applicationGuildCommands(process.env.CLIENT_ID, '1249175249820581960'),
-  { body: [] },
-);
+
     console.log('✅ Slash commands đã được đăng ký thành công trong server!');
   } catch (error) {
     console.error(error);
