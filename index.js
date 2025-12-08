@@ -1,7 +1,7 @@
-// index.js
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
+const { Player } = require('discord-player');   // thêm discord-player
 
 const client = new Client({
   intents: [
@@ -14,6 +14,10 @@ const client = new Client({
 
 const PREFIX = '!';
 client.commands = new Collection();
+
+// Khởi tạo player và gắn vào client
+const player = new Player(client);
+client.player = player;
 
 // Auto load tất cả file trong folder commands
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -38,7 +42,8 @@ client.on('messageCreate', async (message) => {
   if (!command) return;
 
   try {
-    await command.execute(message, args);
+    // truyền thêm client và player vào lệnh
+    await command.execute(message, client, player, args);
   } catch (error) {
     console.error(error);
     message.reply('❌ Có lỗi khi chạy lệnh này!');
@@ -53,12 +58,11 @@ client.on('interactionCreate', async (interaction) => {
   if (!command) return;
 
   try {
-    // Auto defer cho tất cả slash command nếu chưa trả lời
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferReply();
     }
-
-    await command.slashExecute(interaction);
+    // truyền thêm client và player vào lệnh
+    await command.slashExecute(interaction, client, player);
   } catch (error) {
     console.error(error);
     if (!interaction.replied) {

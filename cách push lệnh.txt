@@ -1,0 +1,13 @@
+✅ Các bước chạy lại trong CMD
+- Lưu và commit code (nếu bạn dùng git/GitHub):
+git add .
+git commit -m "fix: update play/voice commands"
+git push origin main
+- Deploy lại slash commands (bắt buộc mỗi khi sửa hoặc thêm slash command):
+node deploy-commands.js
+- Khởi động bot:
+node index.js
+
+
+
+
