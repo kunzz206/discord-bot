@@ -1,111 +1,62 @@
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+// index.js
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
 require('dotenv').config();
+const fs = require('fs');
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates
   ]
 });
 
 const PREFIX = '!';
+client.commands = new Collection();
+
+// Auto load tất cả file trong folder commands
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  client.commands.set(command.name, command);
+}
 
 client.once('ready', () => {
   console.log(`✅ Bot đã đăng nhập với tên: ${client.user.tag}`);
 });
 
-/**
- * Prefix commands: !hello, , !kiss, !hug
- */
+// Prefix commands
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   if (!message.content.startsWith(PREFIX)) return;
 
   const args = message.content.slice(PREFIX.length).trim().split(/\s+/);
-  const command = args.shift()?.toLowerCase();
+  const commandName = args.shift()?.toLowerCase();
 
-  const kissGifs = [
-    'https://media.tenor.com/6dBdEsXHESAAAAAm/kiss.webp',
-    'https://media.tenor.com/bvXwJ4I19ZQAAAAm/cat-cat-meme.webp',
-    'https://media.tenor.com/zSeVsEsjtugAAAAm/peach-and-goma.webp'
-  ];
-  const hugGifs = [
-    'https://media.tenor.com/X6YT2FsV3bAAAAAM/cat.gif',
-    'https://media.tenor.com/dZnXXorasI0AAAAm/hug.webp',
-    'https://media.tenor.com/ofD02MeILMwAAAAm/hug-love.webp'
-  ];
+  const command = client.commands.get(commandName);
+  if (!command) return;
 
-  if (command === 'hello') {
-    return message.reply('Xin chào 👋');
-  }
-
- 
-
-
-  
-
-  if (command === 'kiss') {
-    const target = message.mentions.users.first();
-    if (!target) return message.reply('Bạn hãy mention người muốn kiss nhé, ví dụ: `!kiss @username`');
-    const gif = kissGifs[Math.floor(Math.random() * kissGifs.length)];
-    const embed = new EmbedBuilder()
-      .setDescription(`${message.author} 😘 hôn ${target}!`)
-      .setImage(gif);
-    return message.channel.send({ embeds: [embed] });
-  }
-
-  if (command === 'hug') {
-    const target = message.mentions.users.first();
-    if (!target) return message.reply('Bạn hãy mention người muốn hug nhé, ví dụ: `!hug @username`');
-    const gif = hugGifs[Math.floor(Math.random() * hugGifs.length)];
-    const embed = new EmbedBuilder()
-      .setDescription(`${message.author} 🤗 ôm ${target}!`)
-      .setImage(gif);
-    return message.channel.send({ embeds: [embed] });
+  try {
+    await command.execute(message, args);
+  } catch (error) {
+    console.error(error);
+    message.reply('❌ Có lỗi khi chạy lệnh này!');
   }
 });
 
-/**
- * Slash commands: /hello, , /kiss, /hug
- */
+// Slash commands
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  const kissGifs = [
-    'https://i.imgur.com/wOmoeF8.gif',
-    'https://i.imgur.com/0D0Mmek.gif'
-  ];
-  const hugGifs = [
-    'https://i.imgur.com/r9aU2xv.gif',
-    'https://i.imgur.com/6qYOUQF.gif'
-  ];
+  const command = client.commands.get(interaction.commandName);
+  if (!command) return;
 
-  if (interaction.commandName === 'hello') {
-    return interaction.reply('Xin chào 👋 slash command!');
-  }
-
-  
-  
-
-  
-
-  if (interaction.commandName === 'kiss') {
-    const target = interaction.options.getUser('target');
-    const gif = kissGifs[Math.floor(Math.random() * kissGifs.length)];
-    const embed = new EmbedBuilder()
-      .setDescription(`${interaction.user} 😘 hôn ${target}!`)
-      .setImage(gif);
-    return interaction.reply({ embeds: [embed] });
-  }
-
-  if (interaction.commandName === 'hug') {
-    const target = interaction.options.getUser('target');
-    const gif = hugGifs[Math.floor(Math.random() * hugGifs.length)];
-    const embed = new EmbedBuilder()
-      .setDescription(`${interaction.user} 🤗 ôm ${target}!`)
-      .setImage(gif);
-    return interaction.reply({ embeds: [embed] });
+  try {
+    await command.slashExecute(interaction);
+  } catch (error) {
+    console.error(error);
+    interaction.reply('❌ Có lỗi khi chạy slash command!');
   }
 });
 

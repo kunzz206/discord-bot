@@ -1,30 +1,17 @@
 // deploy-commands.js
-const { REST, Routes, SlashCommandBuilder } = require('discord.js');
+const { REST, Routes } = require('discord.js');
 require('dotenv').config();
+const fs = require('fs');
 
-const commands = [
-  new SlashCommandBuilder()
-    .setName('hello')
-    .setDescription('Chào slash command'),
+const commands = [];
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
-  new SlashCommandBuilder()
-    .setName('kiss')
-    .setDescription('Hôn một người')
-    .addUserOption(option =>
-      option.setName('target')
-        .setDescription('Người bạn muốn kiss')
-        .setRequired(true)
-    ),
-
-  new SlashCommandBuilder()
-    .setName('hug')
-    .setDescription('Ôm một người')
-    .addUserOption(option =>
-      option.setName('target')
-        .setDescription('Người bạn muốn hug')
-        .setRequired(true)
-    ),
-].map(command => command.toJSON());
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  if (command.slashData) {
+    commands.push(command.slashData.toJSON());
+  }
+}
 
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
@@ -32,13 +19,13 @@ const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
   try {
     console.log('🚀 Bắt đầu đăng ký slash commands...');
 
-    // Xóa toàn bộ global commands
+    // Xóa global commands
     await rest.put(
       Routes.applicationCommands(process.env.CLIENT_ID),
       { body: [] },
     );
 
-    // Đăng ký lại guild commands trong server của bạn
+    // Đăng ký lại guild commands
     await rest.put(
       Routes.applicationGuildCommands(process.env.CLIENT_ID, '1249175249820581960'),
       { body: commands },
