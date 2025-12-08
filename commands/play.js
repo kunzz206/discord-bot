@@ -4,20 +4,20 @@ const play = require('play-dl');
 
 module.exports = {
   name: 'play',
-  description: 'Phát nhạc từ YouTube',
+  description: 'Phát nhạc từ YouTube (link hoặc tên bài hát)',
   slashData: new SlashCommandBuilder()
     .setName('play')
     .setDescription('Phát nhạc từ YouTube')
     .addStringOption(option =>
-      option.setName('url')
-        .setDescription('Link YouTube cần phát')
+      option.setName('query')
+        .setDescription('Link YouTube hoặc tên bài hát + tác giả')
         .setRequired(true)
     ),
 
-  // Prefix command: !play <url>
+  // Prefix: !play <link hoặc tên bài hát>
   async execute(message, args) {
-    const url = args[0];
-    if (!url) return message.reply('❌ Bạn cần nhập link YouTube sau lệnh `!play <url>`');
+    const query = args.join(' ');
+    if (!query) return message.reply('❌ Bạn cần nhập link hoặc tên bài hát sau lệnh `!play <query>`');
 
     const voiceChannel = message.member?.voice.channel;
     if (!voiceChannel) return message.reply('❌ Bạn phải vào voice channel trước!');
@@ -28,6 +28,14 @@ module.exports = {
         guildId: message.guild.id,
         adapterCreator: message.guild.voiceAdapterCreator,
       });
+
+      let url = query;
+      // Nếu không phải link YouTube thì tìm kiếm
+      if (!play.yt_validate(query)) {
+        const results = await play.search(query, { limit: 1 });
+        if (!results || results.length === 0) return message.reply('❌ Không tìm thấy bài hát nào!');
+        url = results[0].url;
+      }
 
       const stream = await play.stream(url);
       const resource = createAudioResource(stream.stream, { inputType: stream.type });
@@ -46,15 +54,15 @@ module.exports = {
       });
     } catch (err) {
       console.error(err);
-      message.reply('❌ Không thể phát nhạc từ link này.');
+      message.reply('❌ Không thể phát nhạc từ query này.');
     }
   },
 
-  // Slash command: /play url:<link>
+  // Slash: /play query:<link hoặc tên bài hát>
   async slashExecute(interaction) {
-    const url = interaction.options.getString('url');
+    const query = interaction.options.getString('query');
     const voiceChannel = interaction.member?.voice.channel;
-    if (!voiceChannel) return interaction.reply('❌ Bạn phải vào voice channel trước!');
+    if (!voiceChannel) return interaction.editReply('❌ Bạn phải vào voice channel trước!');
 
     try {
       const connection = joinVoiceChannel({
@@ -62,6 +70,13 @@ module.exports = {
         guildId: interaction.guild.id,
         adapterCreator: interaction.guild.voiceAdapterCreator,
       });
+
+      let url = query;
+      if (!play.yt_validate(query)) {
+        const results = await play.search(query, { limit: 1 });
+        if (!results || results.length === 0) return interaction.editReply('❌ Không tìm thấy bài hát nào!');
+        url = results[0].url;
+      }
 
       const stream = await play.stream(url);
       const resource = createAudioResource(stream.stream, { inputType: stream.type });
@@ -71,16 +86,16 @@ module.exports = {
       connection.subscribe(player);
 
       player.on(AudioPlayerStatus.Playing, () => {
-        interaction.reply(`🎶 Đang phát: ${url}`);
+        interaction.editReply(`🎶 Đang phát: ${url}`);
       });
 
       player.on('error', error => {
         console.error(error);
-        interaction.reply('❌ Có lỗi khi phát nhạc!');
+        interaction.editReply('❌ Có lỗi khi phát nhạc!');
       });
     } catch (err) {
       console.error(err);
-      interaction.reply('❌ Không thể phát nhạc từ link này.');
+      interaction.editReply('❌ Không thể phát nhạc từ query này.');
     }
   }
 };

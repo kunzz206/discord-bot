@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const { joinVoiceChannel } = require('@discordjs/voice');
 
 module.exports = {
@@ -23,12 +23,12 @@ module.exports = {
   // Slash: /join
   async slashExecute(interaction) {
     const channel = interaction.member.voice.channel;
-    if (!channel) return interaction.reply('❌ Bạn phải vào voice channel trước!');
+    if (!channel) return interaction.editReply('❌ Bạn phải vào voice channel trước!');
     joinVoiceChannel({
       channelId: channel.id,
       guildId: interaction.guild.id,
       adapterCreator: interaction.guild.voiceAdapterCreator,
     });
-    interaction.reply(`✅ Đã join voice channel: ${channel.name}`);
+    await interaction.editReply(`✅ Đã join voice channel: ${channel.name}`);
   }
 };

@@ -13,6 +13,7 @@ module.exports = {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
 
+  // Prefix: !kick @username
   async execute(message, args) {
     if (!message.member.permissions.has(PermissionFlagsBits.KickMembers)) {
       return message.reply('❌ Bạn không có quyền kick!');
@@ -24,13 +25,14 @@ module.exports = {
     message.reply(`👢 Đã kick ${target.tag}`);
   },
 
+  // Slash: /kick target:@username
   async slashExecute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.KickMembers)) {
-      return interaction.reply('❌ Bạn không có quyền kick!');
+      return interaction.editReply('❌ Bạn không có quyền kick!');
     }
     const target = interaction.options.getUser('target');
     const member = interaction.guild.members.cache.get(target.id);
     await member.kick();
-    interaction.reply(`👢 Đã kick ${target.tag}`);
+    await interaction.editReply(`👢 Đã kick ${target.tag}`);
   }
 };

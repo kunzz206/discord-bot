@@ -13,7 +13,7 @@ module.exports = {
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 
-  async execute(message, args) {
+  async execute(message) {
     if (!message.member.permissions.has(PermissionFlagsBits.BanMembers)) {
       return message.reply('❌ Bạn không có quyền ban!');
     }
@@ -26,11 +26,11 @@ module.exports = {
 
   async slashExecute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers)) {
-      return interaction.reply('❌ Bạn không có quyền ban!');
+      return interaction.editReply('❌ Bạn không có quyền ban!');
     }
     const target = interaction.options.getUser('target');
     const member = interaction.guild.members.cache.get(target.id);
     await member.ban();
-    interaction.reply(`🚫 Đã ban ${target.tag}`);
+    await interaction.editReply(`🚫 Đã ban ${target.tag}`);
   }
 };

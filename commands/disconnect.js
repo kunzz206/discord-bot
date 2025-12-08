@@ -19,8 +19,8 @@ module.exports = {
   // Slash: /disconnect
   async slashExecute(interaction) {
     const connection = getVoiceConnection(interaction.guild.id);
-    if (!connection) return interaction.reply('❌ Bot không ở trong voice channel!');
+    if (!connection) return interaction.editReply('❌ Bot không ở trong voice channel!');
     connection.destroy();
-    interaction.reply('👋 Bot đã rời voice channel');
+    await interaction.editReply('👋 Bot đã rời voice channel');
   }
 };

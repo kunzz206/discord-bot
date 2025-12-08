@@ -36,6 +36,6 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setDescription(`${interaction.user} 🤗 ôm ${target}!`)
       .setImage(gif);
-    return interaction.reply({ embeds: [embed] });
+    return interaction.editReply({ embeds: [embed] }); // 🔑 đổi reply thành editReply
   }
 };

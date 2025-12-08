@@ -8,7 +8,7 @@ module.exports = {
     .setDescription('Unban một thành viên')
     .addStringOption(option =>
       option.setName('userid')
-        .setDescription('ID của người muốn unban')
+        .setDescription('ID của người bạn muốn unban')
         .setRequired(true)
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
@@ -20,15 +20,15 @@ module.exports = {
     const userId = args[0];
     if (!userId) return message.reply('Bạn phải nhập ID người muốn unban!');
     await message.guild.members.unban(userId);
-    message.reply(`✅ Đã unban ID ${userId}`);
+    message.reply(`🔓 Đã unban ID ${userId}`);
   },
 
   async slashExecute(interaction) {
     if (!interaction.member.permissions.has(PermissionFlagsBits.BanMembers)) {
-      return interaction.reply('❌ Bạn không có quyền unban!');
+      return interaction.editReply('❌ Bạn không có quyền unban!');
     }
     const userId = interaction.options.getString('userid');
     await interaction.guild.members.unban(userId);
-    interaction.reply(`✅ Đã unban ID ${userId}`);
+    await interaction.editReply(`🔓 Đã unban ID ${userId}`);
   }
 };
