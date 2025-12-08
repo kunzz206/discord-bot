@@ -30,14 +30,15 @@ module.exports = {
       });
 
       let url = query;
-      // Nếu không phải link YouTube thì tìm kiếm
       if (!play.yt_validate(query)) {
         const results = await play.search(query, { limit: 1 });
         if (!results || results.length === 0) return message.reply('❌ Không tìm thấy bài hát nào!');
         url = results[0].url;
       }
 
-      const stream = await play.stream(url);
+      // Lấy info + stream từ info
+      const info = await play.video_info(url);
+      const stream = await play.stream_from_info(info);
       const resource = createAudioResource(stream.stream, { inputType: stream.type });
 
       const player = createAudioPlayer();
@@ -45,7 +46,7 @@ module.exports = {
       connection.subscribe(player);
 
       player.on(AudioPlayerStatus.Playing, () => {
-        message.reply(`🎶 Đang phát: ${url}`);
+        message.reply(`🎶 Đang phát: ${info.video_details.title}`);
       });
 
       player.on('error', error => {
@@ -78,7 +79,8 @@ module.exports = {
         url = results[0].url;
       }
 
-      const stream = await play.stream(url);
+      const info = await play.video_info(url);
+      const stream = await play.stream_from_info(info);
       const resource = createAudioResource(stream.stream, { inputType: stream.type });
 
       const player = createAudioPlayer();
@@ -86,7 +88,7 @@ module.exports = {
       connection.subscribe(player);
 
       player.on(AudioPlayerStatus.Playing, () => {
-        interaction.editReply(`🎶 Đang phát: ${url}`);
+        interaction.editReply(`🎶 Đang phát: ${info.video_details.title}`);
       });
 
       player.on('error', error => {
