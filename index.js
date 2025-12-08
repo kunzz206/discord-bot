@@ -16,7 +16,7 @@ client.once('ready', () => {
 });
 
 /**
- * Prefix commands: !hello, !time, !kiss, !hug
+ * Prefix commands: !hello, , !kiss, !hug
  */
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
@@ -40,10 +40,10 @@ client.on('messageCreate', async (message) => {
     return message.reply('Xin chào 👋');
   }
 
-  if (command === 'time') {
-    const now = new Date();
-    return message.reply(`⏰ Bây giờ là ${now.toLocaleTimeString()}`);
-  }
+ 
+
+
+  
 
   if (command === 'kiss') {
     const target = message.mentions.users.first();
@@ -67,7 +67,7 @@ client.on('messageCreate', async (message) => {
 });
 
 /**
- * Slash commands: /hello, /time, /kiss, /hug
+ * Slash commands: /hello, , /kiss, /hug
  */
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
@@ -85,10 +85,10 @@ client.on('interactionCreate', async (interaction) => {
     return interaction.reply('Xin chào 👋 slash command!');
   }
 
-  if (interaction.commandName === 'time') {
-    const now = new Date();
-    return interaction.reply(`⏰ Bây giờ là ${now.toLocaleTimeString()}`);
-  }
+  
+  
+
+  
 
   if (interaction.commandName === 'kiss') {
     const target = interaction.options.getUser('target');
