@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { useQueue } = require('discord-player');
 
 module.exports = {
   name: 'queue',
@@ -9,38 +10,42 @@ module.exports = {
 
   // Prefix: !queue
   async execute(message, client, player) {
-    const queue = player.getQueue(message.guildId);
-    if (!queue || !queue.playing) {
+    const queue = useQueue(message.guildId);
+    if (!queue || !queue.node.isPlaying()) {
       return message.channel.send('❌ Không có bài hát nào trong queue.');
     }
 
-    const tracks = queue.tracks.slice(0, 10).map((t, i) => {
+    const tracks = queue.tracks.toArray().slice(0, 10).map((t, i) => {
       return `${i + 1}. ${t.title} | ${t.requestedBy.username}`;
     }).join('\n');
 
     const embed = new EmbedBuilder()
       .setColor('Random')
       .setTitle('🎶 Danh sách nhạc')
-      .setDescription(`Đang phát: **${queue.current.title}**\n\n${tracks || 'Không có bài hát nào tiếp theo.'}`);
+      .setDescription(
+        `Đang phát: **${queue.currentTrack.title}**\n\n${tracks || 'Không có bài hát nào tiếp theo.'}`
+      );
 
     return message.channel.send({ embeds: [embed] });
   },
 
   // Slash: /queue
   async slashExecute(interaction, client, player) {
-    const queue = player.getQueue(interaction.guildId);
-    if (!queue || !queue.playing) {
+    const queue = useQueue(interaction.guildId);
+    if (!queue || !queue.node.isPlaying()) {
       return interaction.editReply('❌ Không có bài hát nào trong queue.');
     }
 
-    const tracks = queue.tracks.slice(0, 10).map((t, i) => {
+    const tracks = queue.tracks.toArray().slice(0, 10).map((t, i) => {
       return `${i + 1}. ${t.title} | ${t.requestedBy.username}`;
     }).join('\n');
 
     const embed = new EmbedBuilder()
       .setColor('Random')
       .setTitle('🎶 Danh sách nhạc')
-      .setDescription(`Đang phát: **${queue.current.title}**\n\n${tracks || 'Không có bài hát nào tiếp theo.'}`);
+      .setDescription(
+        `Đang phát: **${queue.currentTrack.title}**\n\n${tracks || 'Không có bài hát nào tiếp theo.'}`
+      );
 
     return interaction.editReply({ embeds: [embed] });
   }

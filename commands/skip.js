@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { useQueue } = require('discord-player');
 
 module.exports = {
   name: 'skip',
@@ -8,14 +9,14 @@ module.exports = {
     .setDescription('Chuyển sang bài hát tiếp theo'),
 
   // Prefix: !skip
-  async execute(message, client, player) {
-    const queue = player.getQueue(message.guildId);
-    if (!queue || !queue.playing) {
+  async execute(message) {
+    const queue = useQueue(message.guildId);
+    if (!queue || !queue.node.isPlaying()) {
       return message.channel.send('❌ Không có bài hát nào đang phát.');
     }
 
-    const currentTrack = queue.current;
-    const success = queue.skip();
+    const currentTrack = queue.currentTrack;
+    const success = queue.node.skip();
 
     return message.channel.send(
       success
@@ -25,14 +26,14 @@ module.exports = {
   },
 
   // Slash: /skip
-  async slashExecute(interaction, client, player) {
-    const queue = player.getQueue(interaction.guildId);
-    if (!queue || !queue.playing) {
+  async slashExecute(interaction) {
+    const queue = useQueue(interaction.guildId);
+    if (!queue || !queue.node.isPlaying()) {
       return interaction.editReply('❌ Không có bài hát nào đang phát.');
     }
 
-    const currentTrack = queue.current;
-    const success = queue.skip();
+    const currentTrack = queue.currentTrack;
+    const success = queue.node.skip();
 
     return interaction.editReply(
       success
