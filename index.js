@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
-const { Player } = require('discord-player');   // thêm discord-player
+const { Player } = require('discord-player');
 
 const client = new Client({
   intents: [
@@ -26,8 +26,10 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
-client.once('ready', () => {
+client.once('ready', async () => {
   console.log(`✅ Bot đã đăng nhập với tên: ${client.user.tag}`);
+  await player.extractors.loadDefault(); // load YouTube/Spotify...
+  console.log('🎧 Extractors loaded.');
 });
 
 // Prefix commands
@@ -42,11 +44,10 @@ client.on('messageCreate', async (message) => {
   if (!command) return;
 
   try {
-    // truyền thêm client và player vào lệnh
     await command.execute(message, client, player, args);
   } catch (error) {
     console.error(error);
-    message.reply('❌ Có lỗi khi chạy lệnh này!');
+    message.channel.send('❌ Có lỗi khi chạy lệnh này!');
   }
 });
 
@@ -61,7 +62,6 @@ client.on('interactionCreate', async (interaction) => {
     if (!interaction.deferred && !interaction.replied) {
       await interaction.deferReply();
     }
-    // truyền thêm client và player vào lệnh
     await command.slashExecute(interaction, client, player);
   } catch (error) {
     console.error(error);
