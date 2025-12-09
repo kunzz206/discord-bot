@@ -67,13 +67,16 @@ module.exports = {
 
   // Slash: /play query:<link hoặc tên bài hát>
   async slashExecute(interaction, client, player) {
-    const query = interaction.options.getString('query');
-    const guild = await client.guilds.fetch(interaction.guildId);
-    const author = await guild.members.fetch(interaction.user.id);
+  await interaction.deferReply(); // thêm dòng này ở đầu
 
-    if (!author.voice.channelId) {
-      return interaction.editReply('❌ Bạn chưa vào voice channel.');
-    }
+  const query = interaction.options.getString('query');
+  ...
+  if (!author.voice.channelId) {
+    return interaction.editReply('❌ Bạn chưa vào voice channel.');
+  }
+  ...
+  return interaction.editReply({ embeds: [embed] });
+}
 
     const queue = player.createQueue(interaction.guildId, {
       metadata: { channel: interaction.channel }
