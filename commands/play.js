@@ -53,9 +53,12 @@ module.exports = {
     }
 
     if (!queue.playing) {
-      searchResult.playlist
-        ? queue.addTracks(searchResult.tracks)
-        : queue.play(searchResult.tracks[0]);
+      if (searchResult.playlist) {
+        queue.addTracks(searchResult.tracks);
+        await queue.play(queue.tracks[0]); // thêm await ở đây
+      } else {
+        await queue.play(searchResult.tracks[0]); // thêm await ở đây
+      }
     } else {
       searchResult.playlist
         ? queue.addTracks(searchResult.tracks)
@@ -67,16 +70,13 @@ module.exports = {
 
   // Slash: /play query:<link hoặc tên bài hát>
   async slashExecute(interaction, client, player) {
-  await interaction.deferReply(); // thêm dòng này ở đầu
+    const query = interaction.options.getString('query');
+    const guild = await client.guilds.fetch(interaction.guildId);
+    const author = await guild.members.fetch(interaction.user.id);
 
-  const query = interaction.options.getString('query');
-  ...
-  if (!author.voice.channelId) {
-    return interaction.editReply('❌ Bạn chưa vào voice channel.');
-  }
-  ...
-  return interaction.editReply({ embeds: [embed] });
-}
+    if (!author.voice.channelId) {
+      return interaction.editReply('❌ Bạn chưa vào voice channel.');
+    }
 
     const queue = player.createQueue(interaction.guildId, {
       metadata: { channel: interaction.channel }
@@ -109,17 +109,17 @@ module.exports = {
     }
 
     if (!queue.playing) {
-  if (searchResult.playlist) {
-    queue.addTracks(searchResult.tracks);
-    await queue.play(queue.tracks[0]); // thêm await ở đây
-  } else {
-    await queue.play(searchResult.tracks[0]); // thêm await ở đây
-  }
-} else {
-  searchResult.playlist
-    ? queue.addTracks(searchResult.tracks)
-    : queue.addTrack(searchResult.tracks[0]);
-}
+      if (searchResult.playlist) {
+        queue.addTracks(searchResult.tracks);
+        await queue.play(queue.tracks[0]); // thêm await ở đây
+      } else {
+        await queue.play(searchResult.tracks[0]); // thêm await ở đây
+      }
+    } else {
+      searchResult.playlist
+        ? queue.addTracks(searchResult.tracks)
+        : queue.addTrack(searchResult.tracks[0]);
+    }
 
     return interaction.editReply({ embeds: [embed] });
   }
