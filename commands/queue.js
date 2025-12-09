@@ -21,7 +21,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor('Random')
       .setTitle('🎶 Danh sách nhạc')
-      .setDescription(`Đang phát: **${queue.current.title}**\n\n${tracks}`);
+      .setDescription(`Đang phát: **${queue.current.title}**\n\n${tracks || 'Không có bài hát nào tiếp theo.'}`);
 
     return message.channel.send({ embeds: [embed] });
   },
@@ -40,7 +40,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor('Random')
       .setTitle('🎶 Danh sách nhạc')
-      .setDescription(`Đang phát: **${queue.current.title}**\n\n${tracks}`);
+      .setDescription(`Đang phát: **${queue.current.title}**\n\n${tracks || 'Không có bài hát nào tiếp theo.'}`);
 
     return interaction.editReply({ embeds: [embed] });
   }

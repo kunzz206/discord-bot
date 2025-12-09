@@ -1,5 +1,4 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { getVoiceConnection } = require('@discordjs/voice');
 
 module.exports = {
   name: 'stop',
@@ -9,28 +8,24 @@ module.exports = {
     .setDescription('Dừng nhạc và thoát voice channel'),
 
   // Prefix: !stop
-  async execute(message) {
-    const connection = getVoiceConnection(message.guild.id);
-    if (!connection) return message.reply('❌ Bot không ở trong voice channel!');
-    try {
-      connection.destroy();
-      message.reply('🛑 Đã dừng nhạc và thoát voice channel.');
-    } catch (err) {
-      console.error(err);
-      message.reply('❌ Không thể dừng nhạc.');
+  async execute(message, client, player) {
+    const queue = player.getQueue(message.guildId);
+    if (!queue || !queue.playing) {
+      return message.channel.send('❌ Không có nhạc nào đang phát.');
     }
+
+    queue.destroy();
+    return message.channel.send('🛑 Đã dừng nhạc và thoát voice channel.');
   },
 
   // Slash: /stop
-  async slashExecute(interaction) {
-    const connection = getVoiceConnection(interaction.guild.id);
-    if (!connection) return interaction.editReply('❌ Bot không ở trong voice channel!');
-    try {
-      connection.destroy();
-      await interaction.editReply('🛑 Đã dừng nhạc và thoát voice channel.');
-    } catch (err) {
-      console.error(err);
-      await interaction.editReply('❌ Không thể dừng nhạc.');
+  async slashExecute(interaction, client, player) {
+    const queue = player.getQueue(interaction.guildId);
+    if (!queue || !queue.playing) {
+      return interaction.editReply('❌ Không có nhạc nào đang phát.');
     }
+
+    queue.destroy();
+    return interaction.editReply('🛑 Đã dừng nhạc và thoát voice channel.');
   }
 };

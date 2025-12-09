@@ -55,9 +55,9 @@ module.exports = {
     if (!queue.playing) {
       if (searchResult.playlist) {
         queue.addTracks(searchResult.tracks);
-        await queue.play(queue.tracks[0]); // thêm await ở đây
+        await queue.play(queue.tracks[0]); // thêm await
       } else {
-        await queue.play(searchResult.tracks[0]); // thêm await ở đây
+        await queue.play(searchResult.tracks[0]); // thêm await
       }
     } else {
       searchResult.playlist
@@ -111,9 +111,9 @@ module.exports = {
     if (!queue.playing) {
       if (searchResult.playlist) {
         queue.addTracks(searchResult.tracks);
-        await queue.play(queue.tracks[0]); // thêm await ở đây
+        await queue.play(queue.tracks[0]); // thêm await
       } else {
-        await queue.play(searchResult.tracks[0]); // thêm await ở đây
+        await queue.play(searchResult.tracks[0]); // thêm await
       }
     } else {
       searchResult.playlist

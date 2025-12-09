@@ -16,9 +16,12 @@ module.exports = {
 
     const currentTrack = queue.current;
     const success = queue.skip();
-    return message.channel.send(success
-      ? `⏭️ Đã chuyển bài: **${currentTrack.title}**`
-      : '❌ Không thể chuyển bài.');
+
+    return message.channel.send(
+      success
+        ? `⏭️ Đã chuyển bài: **${currentTrack.title}**`
+        : '❌ Không thể chuyển bài.'
+    );
   },
 
   // Slash: /skip
@@ -30,8 +33,11 @@ module.exports = {
 
     const currentTrack = queue.current;
     const success = queue.skip();
-    return interaction.editReply(success
-      ? `⏭️ Đã chuyển bài: **${currentTrack.title}**`
-      : '❌ Không thể chuyển bài.');
+
+    return interaction.editReply(
+      success
+        ? `⏭️ Đã chuyển bài: **${currentTrack.title}**`
+        : '❌ Không thể chuyển bài.'
+    );
   }
 };
