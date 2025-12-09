@@ -23,7 +23,10 @@ module.exports = {
     }
 
     const queue = player.createQueue(message.guildId, {
-      metadata: { channel: message.channel }
+      metadata: { channel: message.channel },
+      leaveOnEnd: false,
+      leaveOnStop: false,
+      leaveOnEmpty: true
     });
 
     try {
@@ -79,7 +82,10 @@ module.exports = {
     }
 
     const queue = player.createQueue(interaction.guildId, {
-      metadata: { channel: interaction.channel }
+      metadata: { channel: interaction.channel },
+      leaveOnEnd: false,
+      leaveOnStop: false,
+      leaveOnEmpty: true
     });
 
     try {
