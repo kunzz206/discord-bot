@@ -26,11 +26,14 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
+const { DefaultExtractors } = require('@discord-player/extractor'); // thêm dòng này
+
 client.once('ready', async () => {
   console.log(`✅ Bot đã đăng nhập với tên: ${client.user.tag}`);
-  await player.extractors.loadDefault(); // load YouTube/Spotify...
+  await player.extractors.loadMulti(DefaultExtractors); // ✅ đúng với v7
   console.log('🎧 Extractors loaded.');
 });
+
 
 // Prefix commands
 client.on('messageCreate', async (message) => {
