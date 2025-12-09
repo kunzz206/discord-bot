@@ -19,7 +19,7 @@ module.exports = {
       const guild = await client.guilds.fetch(message.guildId);
       const author = await guild.members.fetch(message.author.id);
 
-      if (!author.voice.channelId) {
+      if (!author.voice.channel) {
         return message.channel.send('❌ Bạn chưa vào voice channel.');
       }
 
@@ -37,7 +37,7 @@ module.exports = {
       }
 
       try {
-        if (!queue.connection) await queue.connect(author.voice.channelId);
+        if (!queue.connection) await queue.connect(author.voice.channel);
       } catch (e) {
         console.error('[PLAY PREFIX] connect error:', e);
         queue.delete();
@@ -92,7 +92,7 @@ module.exports = {
       const guild = await client.guilds.fetch(interaction.guildId);
       const author = await guild.members.fetch(interaction.user.id);
 
-      if (!author.voice.channelId) {
+      if (!author.voice.channel) {
         return interaction.editReply('❌ Bạn chưa vào voice channel.');
       }
 
@@ -109,7 +109,7 @@ module.exports = {
       }
 
       try {
-        if (!queue.connection) await queue.connect(author.voice.channelId);
+        if (!queue.connection) await queue.connect(author.voice.channel);
       } catch (e) {
         console.error('[PLAY SLASH] connect error:', e);
         queue.delete();
