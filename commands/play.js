@@ -106,14 +106,17 @@ module.exports = {
     }
 
     if (!queue.playing) {
-      searchResult.playlist
-        ? queue.addTracks(searchResult.tracks)
-        : queue.play(searchResult.tracks[0]);
-    } else {
-      searchResult.playlist
-        ? queue.addTracks(searchResult.tracks)
-        : queue.addTrack(searchResult.tracks[0]);
-    }
+  if (searchResult.playlist) {
+    queue.addTracks(searchResult.tracks);
+    await queue.play(queue.tracks[0]); // thêm await ở đây
+  } else {
+    await queue.play(searchResult.tracks[0]); // thêm await ở đây
+  }
+} else {
+  searchResult.playlist
+    ? queue.addTracks(searchResult.tracks)
+    : queue.addTrack(searchResult.tracks[0]);
+}
 
     return interaction.editReply({ embeds: [embed] });
   }
