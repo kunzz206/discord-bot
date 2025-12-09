@@ -27,7 +27,7 @@ const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
     // Đăng ký lại guild commands
     await rest.put(
-      Routes.applicationGuildCommands(process.env.CLIENT_ID, '1249175249820581960'),
+      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
       { body: commands },
     );
 

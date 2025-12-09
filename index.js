@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 require('dotenv').config();
 const fs = require('fs');
 const { Player } = require('discord-player');
+const { DefaultExtractors } = require('@discord-player/extractor');
 
 const client = new Client({
   intents: [
@@ -26,14 +27,11 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
-const { DefaultExtractors } = require('@discord-player/extractor'); // thêm dòng này
-
 client.once('ready', async () => {
   console.log(`✅ Bot đã đăng nhập với tên: ${client.user.tag}`);
-  await player.extractors.loadMulti(DefaultExtractors); // ✅ đúng với v7
+  await player.extractors.loadMulti(DefaultExtractors); // v7 cú pháp mới
   console.log('🎧 Extractors loaded.');
 });
-
 
 // Prefix commands
 client.on('messageCreate', async (message) => {
@@ -49,8 +47,8 @@ client.on('messageCreate', async (message) => {
   try {
     await command.execute(message, client, player, args);
   } catch (error) {
-    console.error(error);
-    message.channel.send('❌ Có lỗi khi chạy lệnh này!');
+    console.error('[PREFIX CMD ERROR]', error);
+    message.channel.send(`❌ Có lỗi khi chạy lệnh này: ${error?.message || 'Unknown error'}`);
   }
 });
 
@@ -67,9 +65,9 @@ client.on('interactionCreate', async (interaction) => {
     }
     await command.slashExecute(interaction, client, player);
   } catch (error) {
-    console.error(error);
+    console.error('[SLASH CMD ERROR]', error);
     if (!interaction.replied) {
-      await interaction.editReply('❌ Có lỗi khi chạy slash command!');
+      await interaction.editReply(`❌ Có lỗi khi chạy slash command: ${error?.message || 'Unknown error'}`);
     }
   }
 });

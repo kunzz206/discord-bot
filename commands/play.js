@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { QueryType } = require('discord-player');
+const { useMainPlayer, useQueue, QueryType } = require('discord-player');
 
 module.exports = {
   name: 'play',
@@ -24,22 +24,27 @@ module.exports = {
       }
 
       const queryText = args.join(' ');
-      const queue = player.createQueue(message.guildId, {
-        metadata: { channel: message.channel },
-        leaveOnEnd: false,
-        leaveOnStop: false,
-        leaveOnEmpty: true
-      });
+      const mainPlayer = useMainPlayer();
+      let queue = useQueue(message.guildId);
+
+      if (!queue) {
+        queue = mainPlayer.nodes.create(message.guildId, {
+          metadata: { channel: message.channel },
+          leaveOnEnd: false,
+          leaveOnStop: false,
+          leaveOnEmpty: true
+        });
+      }
 
       try {
         if (!queue.connection) await queue.connect(author.voice.channelId);
       } catch (e) {
         console.error('[PLAY PREFIX] connect error:', e);
-        queue.destroy();
+        queue.delete();
         return message.channel.send('❌ Không thể join voice channel!');
       }
 
-      const searchResult = await player.search(queryText, {
+      const searchResult = await mainPlayer.search(queryText, {
         requestedBy: message.author,
         searchEngine: QueryType.AUTO
       });
@@ -58,12 +63,12 @@ module.exports = {
         embed.setDescription(tr.title);
       }
 
-      if (!queue.playing) {
+      if (!queue.node.isPlaying()) {
         if (searchResult.playlist) {
           queue.addTracks(searchResult.tracks);
-          await queue.play(queue.tracks[0]);
+          await queue.node.play(queue.tracks[0]);
         } else {
-          await queue.play(searchResult.tracks[0]);
+          await queue.node.play(searchResult.tracks[0]);
         }
         console.log('[PLAY PREFIX] started playing');
       } else {
@@ -91,22 +96,27 @@ module.exports = {
         return interaction.editReply('❌ Bạn chưa vào voice channel.');
       }
 
-      const queue = player.createQueue(interaction.guildId, {
-        metadata: { channel: interaction.channel },
-        leaveOnEnd: false,
-        leaveOnStop: false,
-        leaveOnEmpty: true
-      });
+      const mainPlayer = useMainPlayer();
+      let queue = useQueue(interaction.guildId);
+
+      if (!queue) {
+        queue = mainPlayer.nodes.create(interaction.guildId, {
+          metadata: { channel: interaction.channel },
+          leaveOnEnd: false,
+          leaveOnStop: false,
+          leaveOnEmpty: true
+        });
+      }
 
       try {
         if (!queue.connection) await queue.connect(author.voice.channelId);
       } catch (e) {
         console.error('[PLAY SLASH] connect error:', e);
-        queue.destroy();
+        queue.delete();
         return interaction.editReply('❌ Không thể join voice channel!');
       }
 
-      const searchResult = await player.search(query, {
+      const searchResult = await mainPlayer.search(query, {
         requestedBy: interaction.user,
         searchEngine: QueryType.AUTO
       });
@@ -125,12 +135,12 @@ module.exports = {
         embed.setDescription(tr.title);
       }
 
-      if (!queue.playing) {
+      if (!queue.node.isPlaying()) {
         if (searchResult.playlist) {
           queue.addTracks(searchResult.tracks);
-          await queue.play(queue.tracks[0]);
+          await queue.node.play(queue.tracks[0]);
         } else {
-          await queue.play(searchResult.tracks[0]);
+          await queue.node.play(searchResult.tracks[0]);
         }
         console.log('[PLAY SLASH] started playing');
       } else {
