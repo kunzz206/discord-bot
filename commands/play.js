@@ -1,5 +1,5 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { useMainPlayer, useQueue, QueryType } = require('discord-player');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { QueryType } = require('discord-player');
 
 module.exports = {
   name: 'play',
@@ -19,13 +19,25 @@ module.exports = {
       const guild = await client.guilds.fetch(message.guildId);
       const author = await guild.members.fetch(message.author.id);
 
+      console.log(`[PLAY PREFIX] user=${message.author.tag} guild=${message.guildId} voice=${author.voice.channel?.id}`);
+
       if (!author.voice.channel) {
         return message.channel.send('❌ Bạn chưa vào voice channel.');
       }
 
+      // Kiểm tra quyền của bot trong voice channel
+      const botMember = await guild.members.fetch(client.user.id);
+      const botPerms = author.voice.channel.permissionsFor(botMember);
+      if (!botPerms || !botPerms.has([PermissionFlagsBits.Connect, PermissionFlagsBits.Speak])) {
+        return message.channel.send('❌ Bot cần quyền `CONNECT` và `SPEAK` ở voice channel này.');
+      }
+
       const queryText = args.join(' ');
-      const mainPlayer = useMainPlayer();
-      let queue = useQueue(message.guildId);
+      const mainPlayer = player;
+      console.log('[PLAY PREFIX] queryText:', queryText);
+      let queue = player.nodes.get(message.guildId);
+
+      console.log('[PLAY PREFIX] queue before create:', !!queue);
 
       if (!queue) {
         queue = mainPlayer.nodes.create(message.guildId, {
@@ -37,10 +49,13 @@ module.exports = {
       }
 
       try {
-        if (!queue.connection) await queue.connect(author.voice.channel);
+        if (!queue.connection) {
+          console.log('[PLAY PREFIX] connecting to voice channel', author.voice.channel.id);
+          await queue.connect(author.voice.channel);
+        }
       } catch (e) {
         console.error('[PLAY PREFIX] connect error:', e);
-        queue.delete();
+        try { queue.delete(); } catch (_) {}
         return message.channel.send('❌ Không thể join voice channel!');
       }
 
@@ -48,6 +63,7 @@ module.exports = {
         requestedBy: message.author,
         searchEngine: QueryType.AUTO
       });
+      console.log('[PLAY PREFIX] searchResult tracks:', searchResult?.tracks?.length || 0, 'isPlaylist:', !!searchResult?.playlist);
 
       if (!searchResult || !searchResult.tracks.length) {
         return message.channel.send(`❌ Không tìm thấy bài hát nào với: ${queryText}`);
@@ -91,13 +107,23 @@ module.exports = {
       const query = interaction.options.getString('query');
       const guild = await client.guilds.fetch(interaction.guildId);
       const author = await guild.members.fetch(interaction.user.id);
+      console.log(`[PLAY SLASH] user=${interaction.user.tag} guild=${interaction.guildId} voice=${author.voice.channel?.id}`);
 
       if (!author.voice.channel) {
         return interaction.editReply('❌ Bạn chưa vào voice channel.');
       }
 
-      const mainPlayer = useMainPlayer();
-      let queue = useQueue(interaction.guildId);
+      // Kiểm tra quyền của bot trong voice channel
+      const botMember = await guild.members.fetch(client.user.id);
+      const botPerms = author.voice.channel.permissionsFor(botMember);
+      if (!botPerms || !botPerms.has([PermissionFlagsBits.Connect, PermissionFlagsBits.Speak])) {
+        return interaction.editReply('❌ Bot cần quyền `CONNECT` và `SPEAK` ở voice channel này.');
+      }
+
+      const mainPlayer = player;
+      console.log('[PLAY SLASH] query:', query);
+      let queue = player.nodes.get(interaction.guildId);
+      console.log('[PLAY SLASH] queue before create:', !!queue);
 
       if (!queue) {
         queue = mainPlayer.nodes.create(interaction.guildId, {
@@ -109,10 +135,13 @@ module.exports = {
       }
 
       try {
-        if (!queue.connection) await queue.connect(author.voice.channel);
+        if (!queue.connection) {
+          console.log('[PLAY SLASH] connecting to voice channel', author.voice.channel.id);
+          await queue.connect(author.voice.channel);
+        }
       } catch (e) {
         console.error('[PLAY SLASH] connect error:', e);
-        queue.delete();
+        try { queue.delete(); } catch (_) {}
         return interaction.editReply('❌ Không thể join voice channel!');
       }
 
@@ -120,6 +149,7 @@ module.exports = {
         requestedBy: interaction.user,
         searchEngine: QueryType.AUTO
       });
+      console.log('[PLAY SLASH] searchResult tracks:', searchResult?.tracks?.length || 0, 'isPlaylist:', !!searchResult?.playlist);
 
       if (!searchResult || !searchResult.tracks.length) {
         return interaction.editReply(`❌ Không tìm thấy bài hát nào với: ${query}`);
